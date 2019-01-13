@@ -166,6 +166,12 @@
 				min-width: 550px;
 			}
 		}
+
+		@media (pointer: coarse){/*El puntero es gordo (el raton vamos)*/
+			#contenedor-salida-eventos .evento > .positivo:hover{
+				opacity: 0;
+			}
+		}
 	</style>
 </head>
 <body>
@@ -208,27 +214,31 @@
     function insertar_al_DOM(fechaInicioEvento, fechaFinEvento, respuestaJSON, posBucle) {
         let fechaInicio = dias[fechaInicioEvento.getDay()] + ', ' + fechaInicioEvento.getDate() + ' de ' + meses[fechaInicioEvento.getMonth()] + ', ' + horas_dos_digitos(fechaInicioEvento) + ':' + minutos_dos_digitos(fechaInicioEvento);
         let fechaFin = dias[fechaFinEvento.getDay()] + ', ' + fechaFinEvento.getDate() + ' de ' + meses[fechaFinEvento.getMonth()] + ', ' + horas_dos_digitos(fechaFinEvento) + ':' + minutos_dos_digitos(fechaFinEvento);
-        //let provincia = respuestaJSON.items[posBucle].location === undefined ? 'No se ha definido ubicación' : respuestaJSON.items[posBucle].location;
-        let observaciones = respuestaJSON.items[posBucle].description === undefined ? 'No hay más detalles sobre el evento' : respuestaJSON.items[posBucle].description;
-        let enlaceGoogleMaps = '<a class="linkMaps" href="http://maps.apple.com/?q=' + respuestaJSON.items[posBucle].location + '" target="_blank">' + respuestaJSON.items[posBucle].location + '</a>';
+        let provincia = typeof respuestaJSON.items[posBucle].location === 'undefined' ? ciudad_evento(respuestaJSON.items[posBucle]) : respuestaJSON.items[posBucle].location;
+        let observaciones = typeof respuestaJSON.items[posBucle].description === 'undefined' ? 'Más información: contacto@centroloyola.org' : respuestaJSON.items[posBucle].description;
+        let enlaceGoogleMaps = '<a class="linkMaps" href="http://maps.apple.com/?q=' + provincia + '" target="_blank">' + provincia + '</a>';
 
         let innerHTML_POPUP = '<div class="cont-popup-evento"><div onclick="this.parentNode.style.display = \'none\';">x</div> <p>' +
-            respuestaJSON.items[posBucle].summary + '</p> <div class="direccion_lugar_hora"> <div class="lugar_evento">' +
+            respuestaJSON.items[posBucle].summary.substring(respuestaJSON.items[posBucle].summary.indexOf(']')+1) + '</p> <div class="direccion_lugar_hora"> <div class="lugar_evento">' +
             '<i class="fa fa-map-marker" aria-hidden="true"></i> ' + enlaceGoogleMaps + '</div> <div class="hora_evento">' +
             '<i class="fa fa-clock-o" aria-hidden="true"></i> ' + fechaInicio + ' - ' + fechaFin +
-            '</div> <div class="observaciones_evento">' + respuestaJSON.items[posBucle].description + '</div> </div> </div>';
+            '</div> <div class="observaciones_evento">' + observaciones + '</div> </div> </div>';
 
         salidaDatos += '<li class="evento">' + innerHTML_POPUP +
             '<div class="positivo" onclick="this.previousElementSibling.style.display = \'inline-block\'"><p>+</p></div>' +
             '<div><div class="fecha"><div class="fecha_dia">' + fechaInicioEvento.getDate() + '&nbsp; </div>' +
             '<div class="fecha_mes">' + meses[fechaInicioEvento.getMonth()].substring(0,3).toUpperCase() + '</div> ' +
             '</div> <div class="direccion_titulo_evento"> <div class="direccion_evento">' +
-            '<i class="fa fa-map-marker" aria-hidden="true"></i> '+ ciudad_evento(respuestaJSON.items[posBucle].location) +'</div> <div class="titulo_evento">' +
-            respuestaJSON.items[posBucle].summary + '</div> </div> </div> </li>';
+            '<i class="fa fa-map-marker" aria-hidden="true"></i> '+ ciudad_evento(respuestaJSON.items[posBucle]) +'</div> <div class="titulo_evento">' +
+            respuestaJSON.items[posBucle].summary.substring(respuestaJSON.items[posBucle].summary.indexOf(']')+1) + '</div> </div> </div> </li>';
     }
 
-    function ciudad_evento(location) {
-        if(location.toLowerCase().indexOf('pamplona') !== -1){
+    function ciudad_evento(evento) {
+        let location = evento.location;
+        if(typeof location === "undefined"){
+            return evento.summary.substring(evento.summary.indexOf('[')+1, evento.summary.indexOf(']'));
+		}
+        else if(location.toLowerCase().indexOf('pamplona') !== -1){
             return 'Pamplona';
         }
         else if(location.toLowerCase().indexOf('iruña') !== -1){

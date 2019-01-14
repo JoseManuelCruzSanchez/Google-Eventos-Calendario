@@ -189,20 +189,46 @@
     let xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
         if (this.readyState === 4 && this.status === 200) {
-            let respuestaJSON = JSON.parse(this.responseText);
-
-            for(let i = 0; i < respuestaJSON.items.length; i++){
-                if(respuestaJSON.items[i].start.dateTime !== undefined){/*Si es de tipo dateTime...*/
-                    let fechaInicioEvento = new Date(respuestaJSON.items[i].start.dateTime);
-                    let fechaFinEvento = new Date(respuestaJSON.items[i].end.dateTime);
-                    insertar_al_DOM(fechaInicioEvento, fechaFinEvento, respuestaJSON, i);
-                }
-                else if(respuestaJSON.items[i].start.date !== undefined){/*Si es de tipo date...*/
-                    let fechaInicioEvento = new Date(respuestaJSON.items[i].start.date);
-                    let fechaFinEvento = new Date(respuestaJSON.items[i].end.date);
-                    insertar_al_DOM(fechaInicioEvento, fechaFinEvento, respuestaJSON, i);
-                }
-            }
+            respuestaJSON = JSON.parse(this.responseText);
+            let cuantos_eventos_mostrar = 4;
+            let url_actual = sede_ciudad_basado_en_url();
+            let pos_item_evento = 0;
+            do{
+                switch (url_actual){/*En que página estamos*/
+					case 'bilbao':
+						if (respuestaJSON.items[pos_item_evento].summary.toLowerCase().indexOf('bilbao') !== -1){
+						    evento_fechas_llamada_insertar(respuestaJSON, pos_item_evento);
+						    cuantos_eventos_mostrar--;
+						}
+						break;
+					case 'pamplona':
+                        if (respuestaJSON.items[pos_item_evento].summary.toLowerCase().indexOf('pamplona') !== -1){
+                            evento_fechas_llamada_insertar(respuestaJSON, pos_item_evento);
+                            cuantos_eventos_mostrar--;
+                        }
+					    break;
+					case 'san-sebastian':
+                        if (respuestaJSON.items[pos_item_evento].summary.toLowerCase().indexOf('san-sebastian') !== -1){
+                            evento_fechas_llamada_insertar(respuestaJSON, pos_item_evento);
+                            cuantos_eventos_mostrar--;
+                        }
+					    break;
+					case 'vitoria':
+                        if (respuestaJSON.items[pos_item_evento].summary.toLowerCase().indexOf('vitoria') !== -1){
+                            evento_fechas_llamada_insertar(respuestaJSON, pos_item_evento);
+                            cuantos_eventos_mostrar--;
+                        }
+					    break;
+					case 'loyola':
+                        evento_fechas_llamada_insertar(respuestaJSON, pos_item_evento);
+                        cuantos_eventos_mostrar--;
+					    break;
+					default:
+                        evento_fechas_llamada_insertar(respuestaJSON, pos_item_evento);
+                        cuantos_eventos_mostrar--;
+				}
+                pos_item_evento++;
+            }while(cuantos_eventos_mostrar > 0);
             salidaDatos += '</ul>';
             document.getElementById('contenedor-salida-eventos').innerHTML = salidaDatos;
         }
@@ -272,6 +298,40 @@
     }
     function horas_dos_digitos(fecha) {
         return (fecha.getHours() < 10 ? '0' : '') + fecha.getHours();
+    }
+    function sede_ciudad_basado_en_url(){
+		let url_sitio = window.location.href;
+		if(url_sitio.indexOf('bilbao') !== -1){
+		    return 'bilbao';
+		}
+        else if(url_sitio.indexOf('pamplona') !== -1){
+            return 'pamplona';
+        }
+        else if(url_sitio.indexOf('san-sebastian') !== -1){
+            return 'san-sebastian';
+        }
+        else if(url_sitio.indexOf('vitoria') !== -1){
+            return 'vitoria';
+        }
+        else if(url_sitio.indexOf('loyola') !== -1){
+            return 'loyola';
+        }
+        else{
+            return 'loyola';
+		}
+	}
+
+    function evento_fechas_llamada_insertar(respuestaJSON, pos_item_evento) {
+        if(respuestaJSON.items[pos_item_evento].start.dateTime !== undefined){/*Si es de tipo dateTime...*/
+            let fechaInicioEvento = new Date(respuestaJSON.items[pos_item_evento].start.dateTime);
+            let fechaFinEvento = new Date(respuestaJSON.items[pos_item_evento].end.dateTime);
+            insertar_al_DOM(fechaInicioEvento, fechaFinEvento, respuestaJSON, pos_item_evento);
+        }
+        else if(respuestaJSON.items[pos_item_evento].start.date !== undefined){/*Si es de tipo date...*/
+            let fechaInicioEvento = new Date(respuestaJSON.items[pos_item_evento].start.date);
+            let fechaFinEvento = new Date(respuestaJSON.items[pos_item_evento].end.date);
+            insertar_al_DOM(fechaInicioEvento, fechaFinEvento, respuestaJSON, pos_item_evento);
+        }
     }
 
 </script>

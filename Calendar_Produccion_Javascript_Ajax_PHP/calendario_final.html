@@ -182,7 +182,7 @@
 <script type="text/javascript">
     let fechaActual = new Date();
     let fechaParametroAPI = fechaActual.getFullYear() + '-' + (parseInt(fechaActual.getMonth())+1) + '-' + fechaActual.getDate() + 'T00:00:00Z';
-    let urlConsultaAPI = 'http://localhost/Calendar_Produccion_Javascript_Ajax_PHP/datos_desde_google.php?fecha=' + fechaParametroAPI;
+    let urlConsultaAPI = 'http://localhost/Google-Eventos-Calendario-master/Calendar_Produccion_Javascript_Ajax_PHP/datos_desde_google.php?fecha=' + fechaParametroAPI;
 
     let dias = ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'];
     let meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
@@ -241,7 +241,7 @@
         let fechaInicio = dias[fechaInicioEvento.getDay()] + ', ' + fechaInicioEvento.getDate() + ' de ' + meses[fechaInicioEvento.getMonth()] + ', ' + horas_dos_digitos(fechaInicioEvento) + ':' + minutos_dos_digitos(fechaInicioEvento);
         let fechaFin = dias[fechaFinEvento.getDay()] + ', ' + fechaFinEvento.getDate() + ' de ' + meses[fechaFinEvento.getMonth()] + ', ' + horas_dos_digitos(fechaFinEvento) + ':' + minutos_dos_digitos(fechaFinEvento);
         let provincia = typeof respuestaJSON.items[posBucle].location === 'undefined' ? ciudad_evento(respuestaJSON.items[posBucle]) : respuestaJSON.items[posBucle].location;
-        let observaciones = typeof respuestaJSON.items[posBucle].description === 'undefined' ? 'Más información: contacto@centroloyola.org' : respuestaJSON.items[posBucle].description;
+        let observaciones = typeof respuestaJSON.items[posBucle].description === 'undefined' ? 'Más información: ' + get_email_segun_ciudad(respuestaJSON.items[posBucle]) : respuestaJSON.items[posBucle].description;
         let enlaceGoogleMaps = '<a class="linkMaps" href="http://maps.apple.com/?q=' + provincia + '" target="_blank">' + provincia + '</a>';
 
         let innerHTML_POPUP = '<div class="cont-popup-evento"><div onclick="this.parentNode.style.display = \'none\';">x</div> <p>' +
@@ -251,7 +251,9 @@
             '</div> <div class="observaciones_evento">' + observaciones + '</div> </div> </div>';
 
         salidaDatos += '<li class="evento">' + innerHTML_POPUP +
-            '<div class="positivo" onclick="this.previousElementSibling.style.display = \'inline-block\'"><p>+</p></div>' +
+            '<div class="positivo" onclick="this.previousElementSibling.style.display = \'inline-block\'">' +
+                '<p><i class="fa fa-search" aria-hidden="true"></i></p>' +
+            '</div>' +
             '<div><div class="fecha"><div class="fecha_dia">' + fechaInicioEvento.getDate() + '&nbsp; </div>' +
             '<div class="fecha_mes">' + meses[fechaInicioEvento.getMonth()].substring(0,3).toUpperCase() + '</div> ' +
             '</div> <div class="direccion_titulo_evento"> <div class="direccion_evento">' +
@@ -259,6 +261,7 @@
             respuestaJSON.items[posBucle].summary.substring(respuestaJSON.items[posBucle].summary.indexOf(']')+1) + '</div> </div> </div> </li>';
     }
 
+    //Si location es IN-definida devolvemos el [ciudad]
     function ciudad_evento(evento) {
         let location = evento.location;
         if(typeof location === "undefined"){
@@ -289,7 +292,40 @@
             return 'San Sebastián';
         }
         else{/*En caso de que pongan un pueblo u otra ciudad que no esta contemplada*/
-            return location;
+            //return location;
+            return evento.summary.substring(evento.summary.indexOf('[')+1, evento.summary.indexOf(']')); /******************    CUAL DE LOS DOS    *****************/
+        }
+    }
+    
+    function get_email_segun_ciudad(evento) {
+		let ciudad = ciudad_evento(evento);
+        if(ciudad.toLowerCase().indexOf('pamplona') !== -1){
+            return 'centroloyola.pa@sjloyola.org';
+        }
+        else if(ciudad.toLowerCase().indexOf('iruña') !== -1){
+            return 'centroloyola.pa@sjloyola.org';
+        }
+        else if(ciudad.toLowerCase().indexOf('bilbao') !== -1){
+            return 'centroloyola.bi@sjloyola.org';
+        }
+        else if(ciudad.toLowerCase().indexOf('bilbo') !== -1){
+            return 'centroloyola.bi@sjloyola.org';
+        }
+        else if(ciudad.toLowerCase().indexOf('vitoria') !== -1){
+            return 'centroloyola.vg@sjloyola.org';
+        }
+        else if(ciudad.toLowerCase().indexOf('vitoria-gasteiz') !== -1){
+            return 'centroloyola.vg@sjloyola.org';
+        }
+        else if(ciudad.toLowerCase().indexOf('san sebastián') !== -1){
+            return 'centroloyoladonostia7@gmail.com';
+        }
+        else if(ciudad.toLowerCase().indexOf('donostia') !== -1){
+            return 'centroloyoladonostia7@gmail.com';
+        }
+        else{
+            //return 'contacto@centroloyola.org';
+            return ' loiolazentroa@santuariodeloyola.org';              /******************    CUAL DE LOS DOS    *****************/
         }
     }
 

@@ -182,7 +182,7 @@
 <script type="text/javascript">
     let fechaActual = new Date();
     let fechaParametroAPI = fechaActual.getFullYear() + '-' + (parseInt(fechaActual.getMonth())+1) + '-' + fechaActual.getDate() + 'T00:00:00Z';
-    let urlConsultaAPI = 'http://localhost/Google-Eventos-Calendario-master/Calendar_Produccion_Javascript_Ajax_PHP/datos_desde_google.php?fecha=' + fechaParametroAPI;
+    let urlConsultaAPI = 'datos_desde_google.php?fecha=' + fechaParametroAPI;
 
     let dias = ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'];
     let meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
@@ -191,6 +191,7 @@
         if (this.readyState === 4 && this.status === 200) {
             respuestaJSON = JSON.parse(this.responseText);
             let cuantos_eventos_mostrar = 4;
+            let en_caso_que_no_haya_eventos = cuantos_eventos_mostrar;
             let url_actual = sede_ciudad_basado_en_url();
             let pos_item_evento = 0;
             do{
@@ -220,17 +221,25 @@
                         }
 					    break;
 					case 'loyola':
-                        evento_fechas_llamada_insertar(respuestaJSON, pos_item_evento);
-                        cuantos_eventos_mostrar--;
+                        if (respuestaJSON.items[pos_item_evento].summary.toLowerCase().indexOf('loyola-azpeitia') !== -1){
+                            evento_fechas_llamada_insertar(respuestaJSON, pos_item_evento);
+                            cuantos_eventos_mostrar--;
+                        }
 					    break;
 					default:
                         evento_fechas_llamada_insertar(respuestaJSON, pos_item_evento);
                         cuantos_eventos_mostrar--;
 				}
                 pos_item_evento++;
-            }while(cuantos_eventos_mostrar > 0);
-            salidaDatos += '</ul>';
-            document.getElementById('contenedor-salida-eventos').innerHTML = salidaDatos;
+            }while(cuantos_eventos_mostrar > 0 && pos_item_evento < respuestaJSON.items.length);
+            if(en_caso_que_no_haya_eventos !== cuantos_eventos_mostrar){//Si hay al menos 1 evento para esta ciudad
+                salidaDatos += '</ul>';
+                document.getElementById('contenedor-salida-eventos').innerHTML = salidaDatos;
+			}else{
+                salidaDatos = '<p style="font-size:16px" id="ciudad_sin_eventos">No hay eventos en las próximas fechas</p>';
+                document.getElementById('contenedor-salida-eventos').innerHTML = salidaDatos;
+			}
+
         }
     };
     xhttp.open("GET", urlConsultaAPI, true);
